@@ -29,9 +29,9 @@ export class TemplatrInstance {
                     '(?::(\\w+))?'          + // Optional type group
                     '(?:(\\(('              + // Start of optional size group
                     '\d+,\d+'               + // #,#
-                    '\d+'                   +
-                    '\d+,'                  +
-                    ',\d+'                  +
+                    '\d+'                   + // #
+                    '\d+,'                  + // #,
+                    ',\d+'                  + // ,#
                     ')\\)))?'               + // End of optional size group
                     '(?:=(".*?"|@\\w+))?'   + // Optional value group
                     '>'                       // End of main options part
