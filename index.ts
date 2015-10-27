@@ -10,7 +10,7 @@ export class TemplatrInstance {
         any: '.:size',
         number: '\\d:size',
         alnum: '\\w:size',
-        hex: '0x[\\da-f]:size'
+        hex: '[\\da-f]:size'
     };
     public overrideValues:boolean;
 
