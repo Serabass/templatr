@@ -1,0 +1,24 @@
+{
+  "name": "templatr",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Serabass/templatr.git"
+  },
+  "author": "Serabass",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Serabass/templatr/issues"
+  },
+  "homepage": "https://github.com/Serabass/templatr#readme",
+  "devDependencies": {
+    "gulp": "^3.9.0",
+    "gulp-load-plugins": "^1.0.0",
+    "gulp-tsc": "^1.1.1"
+  }
+}
