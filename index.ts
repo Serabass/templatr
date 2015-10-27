@@ -1,4 +1,3 @@
-
 declare var require:Function;
 
 var util = require('util');
