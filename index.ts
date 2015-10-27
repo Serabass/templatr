@@ -1,40 +1,7 @@
+/// <reference path="typings/templatr/templatr.d.ts" />
 declare var require:Function;
 
 var util = require('util');
-
-interface TemplatrMatch {
-    name:string;
-    type:string;
-    defaultValue:string;
-    optional:boolean;
-    sizeStart:number;
-    sizeEnd:number;
-}
-
-interface TemplatrOptions {
-    spacesRequired?:boolean,
-    strict?:boolean,
-    overrideValues?:boolean,
-    types?:any
-}
-
-function getSizes(start:string, end:string, optional:boolean):any {
-    var result:any;
-    if (start === void 0) {
-        result = optional ? {start: "0"} : {start: "1"};
-    } else {
-        if (end === void 0) {
-            end = start;
-            if (optional) {
-                start = "0";
-            }
-        }
-
-        result = {start, end}
-    }
-
-    return result;
-}
 
 export class TemplatrInstance {
     public regExp:RegExp;
@@ -48,7 +15,7 @@ export class TemplatrInstance {
     public overrideValues:boolean;
 
     static lexemRegexp():RegExp {
-        return /#(?:<(\w+)(\?)?(?::(\w+))?(?:\(([1-9]+)(?:,(\d+))?\))?(?:=(".*?"|@\w+))?>)?/g;
+        return /#(?:<(\w+)(\?)?(?::(\w+))?(?:\(((?:\d+,\d+|\d+|\d+,|,\d+)?)\))?(?:=(".*?"|@\w+))?>)/g;
     }
 
     constructor(private template:string, private options:TemplatrOptions) {
@@ -67,8 +34,8 @@ export class TemplatrInstance {
                         type:string,
                         defaultValue:string,
                         optional:boolean,
-                        sizeStart:number,
-                        sizeEnd:number
+                        sizeStart:string,
+                        sizeEnd:string
                         ;
 
                     if ( ! exec)
@@ -77,10 +44,10 @@ export class TemplatrInstance {
                     name = exec[1];
                     optional = exec[2] === '?';
                     type = exec[3] || 'any';
-                    defaultValue = exec[3];
+                    defaultValue = exec[5];
 
-                    sizeStart = 0;
-                    sizeEnd = 0;
+                    sizeStart = "0";
+                    sizeEnd = "0";
 
                     return {
                         name,
@@ -106,7 +73,7 @@ export class TemplatrInstance {
             .replace(/\]/g, ')?' )
             .replace(/\{/g, '(?:')
             .replace(/\}/g, ')'  )
-            .replace(TemplatrInstance.lexemRegexp(), (input:string, name:string, optional:string, type:string, sizeStart:string, sizeEnd:string, value:string) => {
+            .replace(TemplatrInstance.lexemRegexp(), (input:string, name:string, optional:string, type:string, size:string, value:string) => {
                 var str:string,
                     typeDef:string,
                     match:TemplatrMatch = this.findMatch(name);
@@ -117,9 +84,15 @@ export class TemplatrInstance {
                 if (this.types[type] === void 0)
                     throw `Type ${type} not exists`;
 
-                let sizes:any = getSizes(sizeStart, sizeEnd, match.optional);
-                match.sizeStart = sizes.start;
-                match.sizeEnd = sizes.end;
+                let sizeData = size.split(',');
+
+                if (sizeData.length === 2) {
+                    match.sizeStart = sizeData[0] || "0";
+                    match.sizeEnd = sizeData[1] || '';
+                } else {
+                    match.sizeStart = sizeData[0] || "0";
+                    match.sizeEnd = sizeData[0] || "0";
+                }
 
                 typeDef = this.types[type].replace(/:size/g, `{${match.sizeStart},${match.sizeEnd||""}}`);
 
@@ -183,6 +156,10 @@ export class TemplatrInstance {
                 result[key] = result[anotherKey];
                 if (this.overrideValues)
                     result[anotherKey] = defaults[anotherKey];
+            } else {
+                if (defaults[key] !== void 0 && result[key] === void 0) {
+                    result[key] = defaults[key].replace(/^"|"$/g, '');
+                }
             }
 
             let typeDef:string = this.types[types[key]];

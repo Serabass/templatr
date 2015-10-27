@@ -1,8 +1,9 @@
 import {TemplatrInstance} from './index'
 
-var tpl = new TemplatrInstance('#<a>@#<b?>.#<c>', {
+var str:string = `[#<b:number(3)="611">+]#<a:number(2,3)>`;
+
+var tpl = new TemplatrInstance(str, {
     spacesRequired: true
 });
 
-console.log(tpl.regExp);
-console.log(tpl.parse('email@.com'));
+console.log(tpl.parse('777+11'));
