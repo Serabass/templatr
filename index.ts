@@ -18,6 +18,28 @@ export class TemplatrInstance {
         return /#(?:<(\w+)(\?)?(?::(\w+))?(?:\(((?:\d+,\d+|\d+|\d+,|,\d+)?)\))?(?:=(".*?"|@\w+))?>)/g;
     }
 
+    static lexemRegexp2():RegExp {
+        return (function(){
+            var result =
+                    '(?:^|[^\\\\])'         + // BOS or not slash
+                    '#'                     + // #
+                    '<'                     + // Start of main options part
+                    '(\\w+)'                + // Start of main options part
+                    '(\\?)?'                + // Optional question char
+                    '(?::(\\w+))?'          + // Optional type group
+                    '(?:(\\(('              + // Start of optional size group
+                    '\d+,\d+'               + // #,#
+                    '\d+'                   +
+                    '\d+,'                  +
+                    ',\d+'                  +
+                    ')\\)))?'               + // End of optional size group
+                    '(?:=(".*?"|@\\w+))?'   + // Optional value group
+                    '>'                       // End of main options part
+                ;
+            return new RegExp(result, 'g');
+        }())
+    }
+
     constructor(private template:string, private options:TemplatrOptions) {
         var defaultOptions:TemplatrOptions = {
                 spacesRequired: true,
@@ -66,14 +88,15 @@ export class TemplatrInstance {
 
         util._extend(this.types, options.types);
 
-        rgxString = template
-            .replace(/[$.\\^+*]/g, '\\$&')
-            .replace(/\s+/g, options.spacesRequired ? '\\s+' : '\\s*')
-            .replace(/\[/g, '(?:')
-            .replace(/\]/g, ')?' )
-            .replace(/\{/g, '(?:')
-            .replace(/\}/g, ')'  )
-            .replace(TemplatrInstance.lexemRegexp(), (input:string, name:string, optional:string, type:string, size:string, value:string) => {
+        rgxString = template;
+
+        rgxString = rgxString.replace(/[$.\\^+*]/g, '\\$&');
+        rgxString = rgxString.replace(/\s+/g, options.spacesRequired ? '\\s+' : '\\s*');
+        rgxString = rgxString.replace(/\[/g, '(?:');
+        rgxString = rgxString.replace(/\]/g, ')?' );
+        rgxString = rgxString.replace(/\{/g, '(?:');
+        rgxString = rgxString.replace(/\}/g, ')'  );
+        rgxString = rgxString.replace(TemplatrInstance.lexemRegexp(), (input:string, name:string, optional:string, type:string, size:string, value:string) => {
                 var str:string,
                     typeDef:string,
                     match:TemplatrMatch = this.findMatch(name);
@@ -139,7 +162,7 @@ export class TemplatrInstance {
             let thisMatch = this.matches[i];
             let passedValue = matches[i];
             if (passedValue === void 0) {
-                passedValue = thisMatch.defaultValue;
+                passedValue = thisMatch.defaultValue.replace(/^"|"$/g, '');
             }
 
             result[thisMatch.name] = passedValue;
@@ -157,8 +180,11 @@ export class TemplatrInstance {
                 if (this.overrideValues)
                     result[anotherKey] = defaults[anotherKey];
             } else {
-                if (defaults[key] !== void 0 && result[key] === void 0) {
-                    result[key] = defaults[key].replace(/^"|"$/g, '');
+                if (result[key] === void 0) {
+                    if (defaults[key] !== void 0) {
+                        result[key] = defaults[key].replace(/^"|"$/g, '');
+                    } else
+                        throw 123;
                 }
             }
 
