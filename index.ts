@@ -21,7 +21,6 @@ export class TemplatrInstance {
     static lexemRegexp2():RegExp {
         return (function(){
             var result =
-                    '(?:^|[^\\\\])'         + // BOS or not slash
                     '#'                     + // #
                     '<'                     + // Start of main options part
                     '(\\w+)'                + // Start of main options part
